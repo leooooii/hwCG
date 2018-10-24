@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffffff
+}
+
+body {
+  overflow: hidden;
+}
+
+
+</style>
+</head>
+
+<body> 
+<div id="info">hw1<br> 
+<button id="dl" style="width:20%">DirctionLight</button>
+<br> 
+<button id="sl" style="width:20%">SpotLight</button>
+</div> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+
+
+	
+<script>
+var camera, scene, renderer, mesh;
+var angle1=0;
+var model;
+var dlhelper, dlshelper, light2,light3,special;
+var mid;
+var box,a,test;
+var slhelper, lschelper;
+var angle2=0, sign = 1;
+var stopd=false,stops=false;
+var top1,top2;
+init();
+animate();
+
+$("#dl").click(function() {
+	stopd= !stopd
+});
+$("#sl").click(function() {
+	stops= !stops
+});
+function triangleExample() {
+
+  let part = new THREE.Object3D();
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    new THREE.Vector3(20, 0, 0),//a
+    new THREE.Vector3(60, 0, 0),//b
+    new THREE.Vector3(20, 30, 0),//c
+
+    new THREE.Vector3(60, 0, -20),//d
+    new THREE.Vector3(20, 0, -20),//e
+    new THREE.Vector3(20, 30, -20)//f
+
+  );
+
+  var face;
+  face = new THREE.Face3(0, 1, 2);
+  face.materialIndex = 0;
+  geometry.faces.push(face);
+  face = new THREE.Face3(5, 3, 4);
+  face.materialIndex = 1;
+  geometry.faces.push(face);
+   face = new THREE.Face3(0, 4, 1);
+  face.materialIndex = 2;
+  geometry.faces.push(face);
+face = new THREE.Face3(1, 4, 3);
+  face.materialIndex = 3;
+  geometry.faces.push(face);
+face = new THREE.Face3(3, 2, 1);
+  face.materialIndex = 4;
+  geometry.faces.push(face);
+  face = new THREE.Face3(2, 3, 5);
+  face.materialIndex = 5;
+  geometry.faces.push(face);
+
+  st0 = new THREE.Vector2(0, 0);
+  st1 = new THREE.Vector2(1, 0);
+	st2 = new THREE.Vector2(0, 0.75);
+  //
+  st5 = new THREE.Vector2(1, 0);
+  st6 = new THREE.Vector2(1, 0.75);
+	st7 = new THREE.Vector2(0, 0);
+  //
+ 
+  //
+	st3 = new THREE.Vector2(1, 0.6);
+  st4 = new THREE.Vector2(0, 0.6);
+  //
+  st8 = new THREE.Vector2(0, 0.5);
+  st9 = new THREE.Vector2(1, 0.5);
+  geometry.faceVertexUvs[0].push([st0, st1, st2]);
+  geometry.faceVertexUvs[0].push([st6, st7, st5]);
+  geometry.faceVertexUvs[0].push([st0, st8, st1]);
+  geometry.faceVertexUvs[0].push([st8, st1, st0]);
+  geometry.faceVertexUvs[0].push([st1, st4, st3]);
+  geometry.faceVertexUvs[0].push([st4, st1, st0]);
+  
+  geometry.computeBoundingSphere();
+  geometry.computeFaceNormals();
+  return geometry
+}
+
+
+function buildB()
+{
+  let loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+  texture = loader.load('https://i.imgur.com/DrvlmNW.jpg');
+  alpha = loader.load('https://i.imgur.com/pYpcBHY.png');
+  var texMat = new THREE.MeshPhongMaterial({
+    map: texture,
+    alphaMap: alpha,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+  var hole=new THREE.Path();
+  hole.absellipse(30,20,4,4,0,Math.PI*2,false);
+  var shape1 = new THREE.Shape ();
+  shape1.moveTo (0,0)  // xy plane
+  shape1.lineTo (60,0)
+  shape1.lineTo (60,10)
+  shape1.lineTo (20, 40)
+  shape1.lineTo (0,40)
+  shape1.lineTo(0,0)
+  shape1.holes.push(hole)
+  let mesh1 = new THREE.Mesh (new THREE.ShapeGeometry(shape1), new THREE.MeshPhongMaterial())
+  mesh1.position.set(10,30,0)
+  mesh1.rotation.y=Math.PI/2
+  mesh1.rotation.z=-Math.PI/2
+  //
+  var shape2 = new THREE.Shape ();
+  shape2.moveTo (0,0)  // xy plane
+  shape2.lineTo (60,0)
+  shape2.lineTo (60,40)
+  shape2.lineTo (0,40)
+  shape2.lineTo(0,0)
+  shape2.holes.push(hole)
+  let mesh2 = new THREE.Mesh (new THREE.ShapeGeometry(shape2), new THREE.MeshPhongMaterial())
+  mesh2.position.set(-10,-30,0)
+  mesh2.rotation.y=-Math.PI/2
+  mesh2.rotation.z=Math.PI/2
+  //
+   var shape3 = new THREE.Shape ();
+  shape3.moveTo (0,0)  // xy plane
+  shape3.lineTo (20,0)
+   shape3.lineTo (20,10)
+  shape3.lineTo (60,10)
+  shape3.lineTo (60,20)
+  shape3.lineTo (0, 20)
+  shape3.lineTo(0,0)
+  let mesh3 = new THREE.Mesh (new THREE.ShapeGeometry(shape3), new THREE.MeshPhongMaterial())
+  mesh3.rotation.x=Math.PI
+  mesh3.rotation.z=Math.PI/2
+  mesh3.position.set(10,30,-40)
+var shape4 = new THREE.Shape ();
+  shape4.moveTo (0,0)  // xy plane
+  shape4.lineTo (40,0)
+  shape4.lineTo (40,20)
+  shape4.lineTo (0, 20)
+  shape4.lineTo(0,0)
+  let mesh4 = new THREE.Mesh (new THREE.ShapeGeometry(shape4), new THREE.MeshPhongMaterial())
+  mesh4.rotation.x=-Math.PI/2
+  mesh4.rotation.z=Math.PI/2
+  mesh4.position.set(10,30,0)
+  //
+  var shape5 = new THREE.Shape ();
+  shape5.moveTo (0,0)  // xy plane
+  shape5.lineTo (30,0)
+  shape5.lineTo (30,-10)
+  shape5.lineTo (40, -10)
+    shape5.lineTo (40, 10)
+    shape5.lineTo (0, 10)
+    shape5.lineTo (0, 0) 
+  let mesh5 = new THREE.Mesh (new THREE.ShapeGeometry(shape5), new THREE.MeshPhongMaterial())
+  mesh5.position.set(0,-30,-40)
+  mesh5.rotation.z=Math.PI/2
+  mesh5.rotation.x=Math.PI/2
+  //
+   var shape6 = new THREE.Shape ();
+  shape6.moveTo (0,0)  // xy plane
+  shape6.lineTo (0,30)
+  shape6.lineTo (-40,30)
+  shape6.lineTo (0, 0)
+  let mesh6 = new THREE.Mesh (new THREE.ShapeGeometry(shape6), new THREE.MeshPhongMaterial())
+  mesh6.rotation.y=Math.PI/2
+  mesh6.rotation.x=-Math.PI/2
+  mesh6.position.set(0,-30,-10)
+  //
+   var shape7= new THREE.Shape ();
+  shape7.moveTo (0,0)  // xy plane
+  shape7.lineTo (50,0)
+  shape7.lineTo (50,10)
+  shape7.lineTo (0, 10)
+  shape7.lineTo (0, 0)
+  let mesh7 = new THREE.Mesh (new THREE.PlaneGeometry(10,50), new THREE.MeshPhongMaterial())
+
+  planeGeo0 = new THREE.PlaneGeometry(20,60)
+  planeGeo0.mergeMesh (mesh1)
+  planeGeo0.mergeMesh (mesh2)
+	planeGeo0.mergeMesh (mesh3)
+    planeGeo0.mergeMesh (mesh4)
+      planeGeo0.mergeMesh (mesh5)
+      planeGeo0.mergeMesh (mesh6)
+       // planeGeo0.mergeMesh (mesh7)
+       planeGeo0.mergeVertices();  
+  return planeGeo0
+}
+
+
+function cel()
+{
+    var geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    new THREE.Vector3(0, 30, 0),//a
+    new THREE.Vector3(40, 0, 0),//b
+    new THREE.Vector3(40, 0, -10),//c
+    new THREE.Vector3(0, 30, -10)//f
+  );
+
+  var face;
+face = new THREE.Face3(0, 1, 2);
+  face.materialIndex = 0;
+  geometry.faces.push(face);
+ face = new THREE.Face3(0, 2, 3);
+  face.materialIndex = 1;
+  geometry.faces.push(face);
+  geometry.computeBoundingSphere();
+  geometry.computeFaceNormals();
+  return geometry
+}
+
+function bulid()
+{
+  let part = new THREE.Object3D();
+    var shape9= new THREE.Shape ();
+  shape9.moveTo (0,0)  // xy plane
+  shape9.lineTo (50,0)
+  shape9.lineTo (50,10)
+  shape9.lineTo (0, 10)
+  shape9.lineTo (0, 0)
+  let mesh9 = new THREE.Mesh (new THREE.ShapeGeometry(shape9), new THREE.MeshPhongMaterial())
+ mesh9.rotation.y=Math.PI/2
+ mesh9.rotation.z=-Math.PI/2
+ mesh9.position.set(20,40,90)
+   part.add (mesh9)
+  return part;
+  
+}
+
+function b1(){
+  let part = new THREE.Object3D();
+  var b=buildB();
+  var a=bulid();
+  a.rotation.z=Math.PI/(3.4)
+  a.position.set(40,0,0)
+  part.add(a,b)
+  return part
+}
+
+function init() {
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.z = 100;
+  scene.add(camera);
+
+  let light = new THREE.PointLight(0xffffff);
+  light.position.set(100, 300, 200);
+ //scene.add(light);
+
+  let gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  //scene.add(gridXZ);
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  document.body.appendChild(renderer.domElement);
+  ////////////////////////////////////////////////////////////////////////
+  //
+   a= new THREE.Mesh(triangleExample(),new THREE.MeshPhongMaterial())
+  let loader = new THREE.TextureLoader()
+  loader.crossOrigin = '';
+
+  var texture = loader.load ( 'https://i.imgur.com/p8CRm9W.jpg' );
+   
+	texture.repeat.set(3, 3);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  
+  var mesh = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), 
+  	new THREE.MeshPhongMaterial({map: texture}))
+      model=b1();
+  mesh.rotation.x = -Math.PI / 2;
+  scene.add(a,mesh)
+  //
+  box = new THREE.Mesh (new THREE.BoxGeometry(40, 30, 40), new THREE.MeshPhongMaterial())
+  box.position.y=15
+   special = new THREE.Mesh (cel(), new THREE.MeshPhongMaterial())
+  special.position.y=15
+  scene.add(special,box)
+  
+   mid = new THREE.Mesh (new THREE.CylinderGeometry(7.5,7.5,20,10,2,true), new THREE.MeshPhongMaterial())
+   scene.add(mid)
+   mid.rotation.z=Math.PI/2
+   
+  special.rotation.y=Math.PI/2
+  special.position.set(20,40,90)
+  //
+  light2 = new THREE.DirectionalLight(0xffffff);
+  light2.position.set(150,100, 0);
+  light2.castShadow = true;
+  light2.shadow.camera.left = -180;
+  light2.shadow.camera.top = -180;
+  light2.shadow.camera.right = 180;
+  light2.shadow.camera.bottom = 180;
+  light2.shadow.camera.near = 1;
+  light2.shadow.camera.far = 300;
+  light2.target = box;
+  light2.shadow.mapSize.width = light2.shadow.mapSize.height = 1024;
+  scene.add(light2);
+  light2.shadow.bias = -.01
+  
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  
+  box.castShadow = true;box.receiveShadow = true;
+  a.castShadow = true;  
+  a.receiveShadow = true;
+  mesh.receiveShadow = true;
+ light2.castShadow  = true; // self shadow
+  
+  dlhelper = new THREE.DirectionalLightHelper( light2, 5 );
+	scene.add( dlhelper );
+  dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
+  scene.add ( dlshelper );
+
+   test =new THREE.Mesh(buildB(),new THREE.MeshPhongMaterial())
+  scene.add(test)
+  test.position.set(10,30,80)
+  test.rotation.x=Math.PI/2
+  
+   top1= new THREE.Mesh(new THREE.PlaneGeometry(10, 20), 
+  	new THREE.MeshPhongMaterial())
+    //scene.add(top1)
+    top1.rotation.x=-Math.PI/2
+  light3 = new THREE.SpotLight(0xffffff, 1.5);
+  light3.position.set(0, 100, 0);
+  light3.angle = Math.PI/3;
+  light3.penumbra = 0.5
+  light3.target = test;
+  light3.castShadow = true;
+  light3.shadow.mapSize.width = 1024;
+  light3.shadow.mapSize.height = 1024;
+  light3.shadow.camera.near = 10;
+  light3.shadow.camera.far = 200;
+  light3.shadow.camera.fov = light3.angle / Math.PI * 180 * 2;
+	 scene.add(light3);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+
+  test.castShadow = true;  test.receiveShadow = true;
+  special.castShadow = true;  special.receiveShadow = true;
+ // top1.castShadow = true;  top1.receiveShadow = true;
+  mesh.receiveShadow = true
+  
+	slhelper = new THREE.SpotLightHelper (light3);
+  lschelper = new THREE.CameraHelper(light3.shadow.camera)  
+  
+  //scene.add (slhelper)
+//  scene.add(lschelper);
+}
+
+function animate() {
+if(stopd)
+  angle1+=0.01;
+  if(stops)
+  angle2+=0.01;
+  a.position.set (40*Math.cos(angle1), 0, 40*Math.sin(angle1)); 
+  box.position.set (40*Math.cos(angle1), 15, 40*Math.sin(angle1)); 
+ test.position.set (120*Math.cos(angle2), 0, 120*Math.sin(angle2)); 
+special.position.set (120*Math.cos(angle2)+10, 10, 120*Math.sin(angle2)+10); 
+mid.position.set (120*Math.cos(angle2), 17.5, 120*Math.sin(angle2));
+//top1.position.set(120*Math.cos(angle2)+5,40,120*Math.sin(angle2)+20);
+	dlhelper.update();
+  dlshelper.update();
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+
+window.focus();
+
+</script>
+</body>
+
+</html>
